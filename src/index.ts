@@ -1,19 +1,21 @@
+import type { Direction, Path } from "./types";
+
 import GameScreen from "./canvas";
 import Dimensions from "./dimensions";
+import Food from "./food";
 import Point from "./point";
 import Snake from "./snake";
-import { Direction, Path } from "./types";
+import { areBoxesInCollision } from "./utils";
 
 const canvas = document.getElementById("game-screen") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
-
-let frame = 0;
 
 class Game {
     private __path: Path;
     private __direction: Direction;
     private __snake: Snake;
     private __snakeSize: Dimensions;
+    private __food: Food;
 
     constructor(snakeSize: Dimensions) {
         this.__path = "horizontal";
@@ -21,6 +23,8 @@ class Game {
 
         this.__snake = new Snake();
         this.__snakeSize = snakeSize;
+
+        this.__food = new Food();
 
         this.initialize();
     }
@@ -32,9 +36,9 @@ class Game {
         GameScreen.setElement(canvas);
 
         this.__snake.setSize(snakeSize.width, snakeSize.height);
-        
+
         const gameScreenSize = gameScreen.getSize();
-        
+
         const positionX = Math.floor(gameScreenSize.width / 2);
         const positionY = Math.floor(gameScreenSize.height / 2);
         const position = new Point(positionX, positionY);
@@ -42,29 +46,67 @@ class Game {
         this.__snake.setPosition(position, "horizontal");
         this.__snake.setColor("green");
 
-        this.animate();
+        this.__food.setColor("blue");
+        this.__food.setSize(this.__snakeSize.width, this.__snakeSize.height);
     }
 
     private animate = (): void => {
         const gameScreen = GameScreen.getInstance();
         const snake = this.__snake;
+        const food = this.__food;
 
-        snake.move(10, this.__path, this.__direction);        
+        snake.move(10, this.__path, this.__direction);
 
         gameScreen.animate(ctx);
+        food.animate(ctx);
         snake.animate(ctx);
+
+        const snakeShouldGrow = this.isSnakeHeadCollidingWithFood();
+
+        if (snakeShouldGrow) {
+            snake.addBody();
+            this.moveFood();
+        }
 
         setTimeout(() => {
             window.requestAnimationFrame(this.animate);
-
-            frame += 40;
-        }, 40);
-
-        
-        if (frame % 4000 == 0) {
-            snake.addBody();
-        }
+        }, 50);
     };
+
+    private isSnakeHeadCollidingWithFood(): boolean {
+        const snake = this.__snake;
+        const food = this.__food;
+
+        const snakeHeadPosition = snake.getHeadPosition();
+        const snakeHeadDimensions = snake.getHeadDimensions();
+
+        const foodPosition = food.getPosition();
+        const foodDimensions = food.getSize();
+
+        return areBoxesInCollision(
+            snakeHeadDimensions,
+            snakeHeadPosition,
+            foodDimensions,
+            foodPosition,
+        );
+    }
+
+    private moveFood(): void {
+        const gameScreen = GameScreen.getInstance();
+        const gameScreenDimensions = gameScreen.getSize();
+
+        const foodDimensions = this.__food.getSize();
+
+        const randomPositionX = Math.floor(Math.random() * (gameScreenDimensions.width - foodDimensions.width));
+        const randomPositionY = Math.floor(Math.random() * (gameScreenDimensions.height - foodDimensions.height));
+
+        this.__food.setPosition(randomPositionX, randomPositionY);
+    }
+
+    startGame(): void {
+        this.moveFood();
+        this.animate();
+    }
 
     setPath(path: Path): void {
         this.__path = path;
@@ -93,6 +135,8 @@ const ARROW_RIGHT = "ArrowRight";
 window.addEventListener("DOMContentLoaded", () => {
     const itemsSize = new Dimensions(10, 10);
     const game = new Game(itemsSize);
+
+    game.startGame();
 
     window.addEventListener("keydown", (e) => {
         const key = e.key;

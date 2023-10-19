@@ -1,0 +1,2 @@
+(() => { (new EventSource("/esbuild")).addEventListener('change', () => location.reload()); })();
+import{pixels_default}from"./chunk-ZW7GF2WM.mjs";var Food=class extends pixels_default{constructor(){super()}animate(ctx){const color=this.getColor();const position=this.getPosition();const dimensions=this.getSize();ctx.fillStyle=color;ctx.fillRect(position.x,position.y,dimensions.width,dimensions.height)}};var food_default=Food;export{food_default};

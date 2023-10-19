@@ -1,4 +1,5 @@
 import GameScreen from "./canvas";
+import Dimensions from "./dimensions";
 import Pixels from "./pixels";
 import Point from "./point";
 import { Direction, Path } from "./types";
@@ -9,10 +10,11 @@ class SnakePart extends Pixels {
     }
     
     override animate(ctx: CanvasRenderingContext2D): void {
+        const color = this.getColor();
         const position = this.getPosition();
         const dimensions = this.getSize();
 
-        ctx.fillStyle = this.getColor();
+        ctx.fillStyle = color;
         ctx.fillRect(position.x, position.y, dimensions.width, dimensions.height);
     }
 }
@@ -45,7 +47,15 @@ class Snake {
         }
     }
 
-    /** To set the initial position of the snake */
+    getHeadPosition(): Point {
+        return this.__head.getPosition();
+    }
+
+    getHeadDimensions(): Dimensions {
+        return this.__head.getSize();
+    }
+
+    /** To set the initial position of the snake. This can only be called once. */
     setPosition(position: Point, path: Path): void {
         if (this.__isPositionSet) {
             console.error("The snake's initial position has already been set. Did you mean to call move()?");
@@ -92,7 +102,7 @@ class Snake {
         this.__body.push(bodyPart);
     }
 
-    /** Set the position of the snake.
+    /** Move the position of the snake.
      *  This will move the snake's head and its body will
      *  follow by changing their positions based on the part
      *  that is in front of them.
@@ -102,6 +112,7 @@ class Snake {
         const gameScreenDimensions = gameScreen.getSize();
         
         const head = this.__head;
+        const headDimensions = this.getHeadDimensions();
         const currentHeadPosition = head.getPosition();
 
         let positionOfPartInFront = currentHeadPosition;
@@ -112,7 +123,7 @@ class Snake {
             if (newPosition >= gameScreenDimensions.width) {
                 newPosition = 0;
             } else if (newPosition <= 0) {
-                newPosition = gameScreenDimensions.width;
+                newPosition = gameScreenDimensions.width - headDimensions.width;
             }
 
             head.setPosition(newPosition, currentHeadPosition.y);
@@ -124,7 +135,7 @@ class Snake {
             if (newPosition >= gameScreenDimensions.height) {
                 newPosition = 0;
             } else if (newPosition <= 0) {
-                newPosition = gameScreenDimensions.height;
+                newPosition = gameScreenDimensions.height - headDimensions.height;
             }
 
             head.setPosition(currentHeadPosition.x, newPosition);
@@ -153,6 +164,10 @@ class Snake {
         for (const part of this.__body) {
             part.animate(ctx);
         }
+    }
+
+    isSnakeHeadCollidingWithBody(): void {
+        
     }
 }
 

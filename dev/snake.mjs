@@ -1,2 +1,2 @@
 (() => { (new EventSource("/esbuild")).addEventListener('change', () => location.reload()); })();
-import{snake_default}from"./chunk-TVRJSB3P.mjs";import"./chunk-2WNCNO4G.mjs";import"./chunk-ZW7GF2WM.mjs";import"./chunk-WE7ZGQYM.mjs";import"./chunk-6GXGR2B5.mjs";export{snake_default as default};
+import{snake_default}from"./chunk-VMRTUPZ5.mjs";import"./chunk-2WNCNO4G.mjs";import"./chunk-ZW7GF2WM.mjs";import"./chunk-WE7ZGQYM.mjs";import"./chunk-6GXGR2B5.mjs";export{snake_default as default};

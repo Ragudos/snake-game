@@ -9,9 +9,9 @@ import { Dimensions, Point } from "./types";
  * - second box's position veritcally > first box's height combined with its position vertically.
  * - first box's position veritcally > second box's height combined with its position.
  */
-export function areBoxesInCollision(firstBox: Dimensions & Point, secondBox: Dimensions & Point): boolean {
-    const isNotIntersectingHorizontally = firstBox.x > secondBox.width + secondBox.x || secondBox.x > firstBox.width + firstBox.x;
-    const isNotIntersectingVertically = firstBox.y > secondBox.height + secondBox.y || secondBox.y > firstBox.height + firstBox.y;
+export function areBoxesInCollision(firstBoxDimensions: Dimensions, firstBoxPosition: Point, secondBoxDimensions: Dimensions, secondBoxPosition: Point): boolean {
+    const isNotIntersectingHorizontally = firstBoxPosition.x > secondBoxDimensions.width + secondBoxPosition.x || secondBoxPosition.x > firstBoxDimensions.width + firstBoxPosition.x;
+    const isNotIntersectingVertically = firstBoxPosition.y > secondBoxDimensions.height + secondBoxPosition.y || secondBoxPosition.y > firstBoxDimensions.height + firstBoxPosition.y;
 
     return !isNotIntersectingHorizontally && !isNotIntersectingVertically;
 };
