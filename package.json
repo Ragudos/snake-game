@@ -1,0 +1,13 @@
+{
+  "name": "snake-game",
+  "packageManager": "yarn@3.6.4",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.dev.js && tsc --build",
+    "build": "node esbuild.build.js && tsc --build"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.5",
+    "typescript": "^5.2.2"
+  }
+}
