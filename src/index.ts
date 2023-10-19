@@ -55,11 +55,20 @@ class Game {
         const snake = this.__snake;
         const food = this.__food;
 
+        
         snake.move(10, this.__path, this.__direction);
-
+        
         gameScreen.animate(ctx);
         food.animate(ctx);
         snake.animate(ctx);
+        
+        const isGameOver = snake.isSnakeHeadCollidingWithBody(this.__direction, this.__path);
+
+        if (isGameOver) {
+            alert("GAME OVER");
+
+            return;
+        }
 
         const snakeShouldGrow = this.isSnakeHeadCollidingWithFood();
 
@@ -67,7 +76,7 @@ class Game {
             snake.addBody();
             this.moveFood();
         }
-
+        
         setTimeout(() => {
             window.requestAnimationFrame(this.animate);
         }, 50);

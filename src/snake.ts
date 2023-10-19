@@ -3,6 +3,7 @@ import Dimensions from "./dimensions";
 import Pixels from "./pixels";
 import Point from "./point";
 import { Direction, Path } from "./types";
+import { areBoxesInCollision } from "./utils";
 
 class SnakePart extends Pixels {
     constructor() {
@@ -88,10 +89,13 @@ class Snake {
     }
 
     addBody(): void {
-        const bodyPart = new SnakePart();
-        const snakeColor = this.__head.getColor();
+        const head = this.__head;
+        const body = this.__body;
 
-        const lastBodyPart = this.__body[this.__body.length - 1]!;
+        const bodyPart = new SnakePart();
+        const snakeColor = head.getColor();
+
+        const lastBodyPart = body[body.length - 1]!;
         const lastBodyPartPosition = lastBodyPart.getPosition();
         const lastBodyPartSize = lastBodyPart.getSize();
 
@@ -108,11 +112,13 @@ class Snake {
      *  that is in front of them.
      */
     move(pos: number, path: Path, direction: Direction): void {
+        const head = this.__head;
+        const body = this.__body;
+
         const gameScreen = GameScreen.getInstance();
         const gameScreenDimensions = gameScreen.getSize();
         
-        const head = this.__head;
-        const headDimensions = this.getHeadDimensions();
+        const headDimensions = head.getSize();
         const currentHeadPosition = head.getPosition();
 
         let positionOfPartInFront = currentHeadPosition;
@@ -141,7 +147,7 @@ class Snake {
             head.setPosition(currentHeadPosition.x, newPosition);
         }
 
-        for (const part of this.__body) {
+        for (const part of body) {
             const currentPartPosition = part.getPosition();
 
             part.setPosition(positionOfPartInFront.x, positionOfPartInFront.y);
@@ -151,23 +157,184 @@ class Snake {
     }
 
     setColor(color: string): void {
-        this.__head.setColor(color);
+        const head = this.__head;
+        const body = this.__body;
 
-        for (const part of this.__body) {
+        head.setColor(color);
+
+        for (const part of body) {
             part.setColor(color);
         }
     }
 
     animate(ctx: CanvasRenderingContext2D): void {
-        this.__head.animate(ctx);
+        const head = this.__head;
+        const body = this.__body;
 
-        for (const part of this.__body) {
+        head.animate(ctx);
+
+        for (const part of body) {
             part.animate(ctx);
         }
     }
 
-    isSnakeHeadCollidingWithBody(): void {
-        
+    isSnakeHeadCollidingWithBody(currentDirection: Direction, currentPath: Path): boolean {
+        const isSnakeGoingRight = currentDirection == 1 && currentPath == "horizontal";
+        const isSnakeGoingLeft = currentDirection == -1 && currentPath == "horizontal";
+        const isSnakeGoingDown = currentDirection == 1 && currentPath == "vertical";
+        const isSnakeGoingUp = currentDirection == -1 && currentPath == "vertical";
+
+        if (isSnakeGoingRight) {
+            return this.isSnakeCollidingWithBodyWhenGoingRight();
+        } else if (isSnakeGoingLeft) {
+            return this.isSnakeCollidingWithBodyWhenGoingLeft();
+        } else if (isSnakeGoingUp) {
+            return this.isSnakeCollidingWithBodyWhenGoingUp();
+        } else if (isSnakeGoingDown) {
+            return this.isSnakeCollidingWhenGoingDown();
+        }
+
+        return false;
+    }
+
+    private isSnakeCollidingWhenGoingDown(): boolean {
+        const head = this.__head;
+        const body = this.__body;
+
+        const headPosition = head.getPosition();
+        const headDimensions = head.getSize();
+
+        const floorOfHead = headPosition.y + headDimensions.height;
+
+        const headPositionWithRoofOfHead = {
+            x: headPosition.x,
+            y: floorOfHead,
+        } satisfies Point;
+
+        for (let idx = body.length - 1; idx >= 1; --idx) {
+            const part = body[idx]!;
+
+            const partDimensions = part.getSize();
+            const partPosition = part.getPosition();
+
+            const isColliding = areBoxesInCollision(
+                headDimensions,
+                headPositionWithRoofOfHead,
+                partDimensions,
+                partPosition,
+            );
+
+            if (isColliding) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private isSnakeCollidingWithBodyWhenGoingUp(): boolean {
+        const head = this.__head;
+        const body = this.__body;
+
+        const headPosition = head.getPosition();
+        const headDimensions = head.getSize();
+
+        const roofOfHead = headPosition.y - headDimensions.height;
+
+        const headPositionWithRoofOfHead = {
+            x: headPosition.x,
+            y: roofOfHead,
+        } satisfies Point;
+
+        for (let idx = body.length - 1; idx >= 1; --idx) {
+            const part = body[idx]!;
+
+            const partDimensions = part.getSize();
+            const partPosition = part.getPosition();
+
+            const isColliding = areBoxesInCollision(
+                headDimensions,
+                headPositionWithRoofOfHead,
+                partDimensions,
+                partPosition,
+            );
+
+            if (isColliding) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private isSnakeCollidingWithBodyWhenGoingLeft(): boolean {
+        const head = this.__head;
+        const body = this.__body;
+
+        const headPosition = head.getPosition();
+        const headDimensions = head.getSize();
+
+        const backOfHead = headPosition.x - headDimensions.width;
+
+        const headPositionWithBackOfHead = {
+            x: backOfHead,
+            y: headPosition.y
+        } satisfies Point;
+
+        for (let idx = body.length - 1; idx >= 1; --idx) {
+            const part = body[idx]!;
+
+            const partDimensions = part.getSize();
+            const partPosition = part.getPosition();
+
+            const isColliding = areBoxesInCollision(
+                headDimensions,
+                headPositionWithBackOfHead,
+                partDimensions,
+                partPosition,
+            );
+
+            if (isColliding) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private isSnakeCollidingWithBodyWhenGoingRight(): boolean {
+        const head = this.__head;
+        const body = this.__body;
+
+        const headPosition = head.getPosition();
+        const headDimensions = head.getSize();
+
+        const frontOfHead = headPosition.x + headDimensions.width;
+
+        const headPositionWithFrontOfHead = {
+            x: frontOfHead,
+            y: headPosition.y
+        } satisfies Point;
+
+        for (let idx = body.length - 1; idx >= 1; --idx) {
+            const part = body[idx]!;
+
+            const partDimensions = part.getSize();
+            const partPosition = part.getPosition();
+
+            const isColliding = areBoxesInCollision(
+                headDimensions,
+                headPositionWithFrontOfHead,
+                partDimensions,
+                partPosition,
+            );
+
+            if (isColliding) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
