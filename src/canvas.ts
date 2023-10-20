@@ -1,52 +1,29 @@
-import Pixels from "./pixels";
+import { SquarePixels } from "./pixels";
 
-class GameScreen extends Pixels {
-    private static instance: GameScreen;
-    private static element: HTMLCanvasElement;
+class GameScreen extends SquarePixels {
+    private element: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
 
-    private constructor() {
+    constructor(canvas: HTMLCanvasElement, backgroundColor: string) {
         super();
+
+        this.element = canvas;
+        this.ctx = canvas.getContext("2d")!;
+
+        const width = canvas.width;
+        const height = canvas.height;
+
+        this.setPosition(0, 0);
+        this.setSize(width, height);
+        this.setColor(backgroundColor);
     }
 
-    public static getInstance(): GameScreen {
-        if (GameScreen.instance == null) {
-            GameScreen.instance = new GameScreen();
-        }
-
-        return GameScreen.instance;
+    getElement(): HTMLCanvasElement {
+        return this.element!;
     }
 
-    public static setElement(element: HTMLCanvasElement): void {
-        const width = element.width;
-        const height = element.height;
-
-        GameScreen.instance.setSize(width, height);
-        GameScreen.instance.setPosition(0, 0);
-        GameScreen.instance.setColor("black");
-
-        GameScreen.element = element;
-    }
-
-    public static getElement(): HTMLCanvasElement {
-        return GameScreen.element;
-    }
-
-    override animate(ctx: CanvasRenderingContext2D): void {
-        const element = GameScreen.element;   
-    
-        if (element == null) {
-            const error = new Error("Please provide the canvas element.");
-            
-            console.error(error);
-
-            return;
-        }
-
-        const position = GameScreen.instance.getPosition();
-        const dimensions = GameScreen.instance.getSize();
-
-        ctx.fillStyle = GameScreen.instance.getColor();
-        ctx.fillRect(position.x, position.y, dimensions.width, dimensions.height);
+    getContext(): CanvasRenderingContext2D {
+        return this.ctx;
     }
 };
 

@@ -1,17 +1,19 @@
-import Pixels from "./pixels";
+import type GameScreen from "./canvas";
+import { SquarePixels } from "./pixels";
 
-class Food extends Pixels {
+class Food extends SquarePixels {
     constructor() {
         super();
     }
 
-    override animate(ctx: CanvasRenderingContext2D): void {
-        const color = this.getColor();
-        const position = this.getPosition();
-        const dimensions = this.getSize();
+    move(gameScreen: GameScreen): void {
+        const gameScreenDimensions = gameScreen.getSize();
+        const foodDimensions = this.getSize();
 
-        ctx.fillStyle = color;
-        ctx.fillRect(position.x, position.y, dimensions.width, dimensions.height);
+        const randomPositionX = Math.floor(Math.random() * (gameScreenDimensions.width - foodDimensions.width));
+        const randomPositionY = Math.floor(Math.random() * (gameScreenDimensions.height - foodDimensions.height));
+    
+        this.setPosition(randomPositionX, randomPositionY);
     }
 }
 

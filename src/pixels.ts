@@ -39,4 +39,21 @@ abstract class Pixels {
     }
 }
 
-export default Pixels;
+class SquarePixels extends Pixels {
+    constructor() {
+        super();
+    }
+
+    override animate(ctx: CanvasRenderingContext2D): void {
+        const color = this.getColor();
+        const position = this.getPosition();
+        const dimensions = this.getSize();
+
+        ctx.fillStyle = color;
+        ctx.fillRect(position.x, position.y, dimensions.width, dimensions.height);
+    }
+}
+
+export {
+    SquarePixels
+};

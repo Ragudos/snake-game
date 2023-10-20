@@ -10,3 +10,4 @@ export interface Point {
 
 export type Path = "horizontal" | "vertical";
 export type Direction = -1 | 1;
+export type Subscriber<T> = (payload: T) => void;

@@ -8,6 +8,8 @@ import { Dimensions, Point } from "./types";
  * - first box's position horizontally > second box's width combined with its position horizontally.
  * - second box's position veritcally > first box's height combined with its position vertically.
  * - first box's position veritcally > second box's height combined with its position.
+ * 
+ *  Please note that this only works on squares.
  */
 export function areBoxesInCollision(firstBoxDimensions: Dimensions, firstBoxPosition: Point, secondBoxDimensions: Dimensions, secondBoxPosition: Point): boolean {
     const isNotIntersectingHorizontally = firstBoxPosition.x >= secondBoxDimensions.width + secondBoxPosition.x || secondBoxPosition.x >= firstBoxDimensions.width + firstBoxPosition.x;

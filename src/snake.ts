@@ -1,39 +1,42 @@
-import GameScreen from "./canvas";
+import type { Direction, Path } from "./types";
+import type GameScreen from "./canvas";
+
 import Dimensions from "./dimensions";
-import Pixels from "./pixels";
 import Point from "./point";
-import { Direction, Path } from "./types";
+import { SquarePixels } from "./pixels";
 import { areBoxesInCollision } from "./utils";
 
-class SnakePart extends Pixels {
-    constructor() {
-        super();
-    }
-    
-    override animate(ctx: CanvasRenderingContext2D): void {
-        const color = this.getColor();
-        const position = this.getPosition();
-        const dimensions = this.getSize();
-
-        ctx.fillStyle = color;
-        ctx.fillRect(position.x, position.y, dimensions.width, dimensions.height);
-    }
-}
-
+/** Representation of a snake:
+ * 
+ *  HEAD
+ * 
+ *  BODY
+ * 
+ *  TAIL
+ */
 class Snake {
-    private __head: SnakePart;
-    private __body: SnakePart[];
+    private __head: SquarePixels;
+    private __body: SquarePixels[];
     private __isPositionSet: boolean;
 
-    constructor() {
-        const head = new SnakePart();
-        const firstBody = new SnakePart();
-        const secondBody = new SnakePart();
-        const thirdBody = new SnakePart();
+    constructor(baseSnakeLength: number) {
+        if (baseSnakeLength < 3) {
+            const error = new Error("A snake must be at least 3 blocks long.");
 
+            console.error(error);
+            throw error;
+        }
+
+        const head = new SquarePixels();
         this.__head = head;
-        this.__body = [firstBody, secondBody, thirdBody];
+        this.__body = [];
         this.__isPositionSet = false;
+
+        for (let idx = 0; idx < baseSnakeLength; ++idx) {
+            const body = new SquarePixels();
+
+            this.__body.push(body);
+        }
     }
 
     /** To set the size of the
@@ -41,8 +44,10 @@ class Snake {
      *  of each snake pixel.
      */
     setSize(width: number, height: number): void {
-        this.__head.setSize(width, height);
-        
+        const head = this.__head;
+
+        head.setSize(width, height);
+
         for (const part of this.__body) {
             part.setSize(width, height);
         }
@@ -68,7 +73,7 @@ class Snake {
 
         let positionX = position.x;
         let positionY = position.y;
-        
+
         for (let idx = this.__body.length - 1; idx >= 0; --idx) {
             const part = this.__body[idx]!;
             const currentPartSize = part.getSize();
@@ -92,7 +97,7 @@ class Snake {
         const head = this.__head;
         const body = this.__body;
 
-        const bodyPart = new SnakePart();
+        const bodyPart = new SquarePixels();
         const snakeColor = head.getColor();
 
         const lastBodyPart = body[body.length - 1]!;
@@ -111,13 +116,12 @@ class Snake {
      *  follow by changing their positions based on the part
      *  that is in front of them.
      */
-    move(pos: number, path: Path, direction: Direction): void {
+    move(pos: number, path: Path, direction: Direction, gameScreen: GameScreen): void {
         const head = this.__head;
         const body = this.__body;
 
-        const gameScreen = GameScreen.getInstance();
         const gameScreenDimensions = gameScreen.getSize();
-        
+
         const headDimensions = head.getSize();
         const currentHeadPosition = head.getPosition();
 
@@ -179,39 +183,38 @@ class Snake {
     }
 
     isSnakeHeadCollidingWithBody(currentDirection: Direction, currentPath: Path): boolean {
+        const head = this.__head;
+        const body = this.__body;
+
+        const currentHeadPosition = head.getPosition();
+        const headDimensions = head.getSize();
+
         const isSnakeGoingRight = currentDirection == 1 && currentPath == "horizontal";
         const isSnakeGoingLeft = currentDirection == -1 && currentPath == "horizontal";
         const isSnakeGoingDown = currentDirection == 1 && currentPath == "vertical";
         const isSnakeGoingUp = currentDirection == -1 && currentPath == "vertical";
 
-        console.log(isSnakeGoingRight, isSnakeGoingLeft, isSnakeGoingDown, isSnakeGoingUp)
+        let headPosition: Point;
 
         if (isSnakeGoingRight) {
-            return this.isSnakeCollidingWithBodyWhenGoingRight();
+            const positionX = this.getPositionOfHeadCombinedWithItsRightEdge(currentHeadPosition, headDimensions);
+
+            headPosition = new Point(positionX, currentHeadPosition.y);
         } else if (isSnakeGoingLeft) {
-            return this.isSnakeCollidingWithBodyWhenGoingLeft();
+            const positionX = this.getPositionOfHeadCombinedWithItsLeftEdge(currentHeadPosition, headDimensions);
+
+            headPosition = new Point(positionX, currentHeadPosition.y);
         } else if (isSnakeGoingUp) {
-            return this.isSnakeCollidingWithBodyWhenGoingUp();
+            const positionY = this.getPositionOfHeadCombinedWithItsUpperEdge(currentHeadPosition, headDimensions);
+
+            headPosition = new Point(currentHeadPosition.y, positionY);
         } else if (isSnakeGoingDown) {
-            return this.isSnakeCollidingWhenGoingDown();
+            const positionY = this.getPositionOfHeadCombinedWithItsLowerEdge(currentHeadPosition, headDimensions);
+
+            headPosition = new Point(currentHeadPosition.y, positionY);
+        } else {
+            headPosition = currentHeadPosition;
         }
-
-        return false;
-    }
-
-    private isSnakeCollidingWhenGoingDown(): boolean {
-        const head = this.__head;
-        const body = this.__body;
-
-        const headPosition = head.getPosition();
-        const headDimensions = head.getSize();
-
-        const floorOfHead = headPosition.y + headDimensions.height;
-
-        const headPositionWithRoofOfHead = {
-            x: headPosition.x,
-            y: floorOfHead,
-        } satisfies Point;
 
         for (let idx = body.length - 1; idx >= 0; --idx) {
             const part = body[idx]!;
@@ -221,7 +224,7 @@ class Snake {
 
             const isColliding = areBoxesInCollision(
                 headDimensions,
-                headPositionWithRoofOfHead,
+                headPosition,
                 partDimensions,
                 partPosition,
             );
@@ -234,109 +237,20 @@ class Snake {
         return false;
     }
 
-    private isSnakeCollidingWithBodyWhenGoingUp(): boolean {
-        const head = this.__head;
-        const body = this.__body;
-
-        const headPosition = head.getPosition();
-        const headDimensions = head.getSize();
-
-        const roofOfHead = headPosition.y - headDimensions.height;
-
-        const headPositionWithRoofOfHead = {
-            x: headPosition.x,
-            y: roofOfHead,
-        } satisfies Point;
-
-        for (let idx = body.length - 1; idx >= 0; --idx) {
-            const part = body[idx]!;
-
-            const partDimensions = part.getSize();
-            const partPosition = part.getPosition();
-
-            const isColliding = areBoxesInCollision(
-                headDimensions,
-                headPositionWithRoofOfHead,
-                partDimensions,
-                partPosition,
-            );
-
-            if (isColliding) {
-                return true;
-            }
-        }
-
-        return false;
+    private getPositionOfHeadCombinedWithItsLowerEdge(headPosition: Point, headDimensions: Dimensions): number {
+        return headPosition.y + headDimensions.height;
     }
 
-    private isSnakeCollidingWithBodyWhenGoingLeft(): boolean {
-        const head = this.__head;
-        const body = this.__body;
-
-        const headPosition = head.getPosition();
-        const headDimensions = head.getSize();
-
-        const backOfHead = headPosition.x - headDimensions.width;
-
-        const headPositionWithBackOfHead = {
-            x: backOfHead,
-            y: headPosition.y
-        } satisfies Point;
-
-        for (let idx = body.length - 1; idx >= 0; --idx) {
-            const part = body[idx]!;
-
-            const partDimensions = part.getSize();
-            const partPosition = part.getPosition();
-
-            const isColliding = areBoxesInCollision(
-                headDimensions,
-                headPositionWithBackOfHead,
-                partDimensions,
-                partPosition,
-            );
-
-            if (isColliding) {
-                return true;
-            }
-        }
-
-        return false;
+    private getPositionOfHeadCombinedWithItsUpperEdge(headPosition: Point, headDimensions: Dimensions): number {
+        return headPosition.y - headDimensions.height;
     }
 
-    private isSnakeCollidingWithBodyWhenGoingRight(): boolean {
-        const head = this.__head;
-        const body = this.__body;
+    private getPositionOfHeadCombinedWithItsRightEdge(headPosition: Point, headDimensions: Dimensions): number {
+        return headPosition.x + headDimensions.width;
+    }
 
-        const headPosition = head.getPosition();
-        const headDimensions = head.getSize();
-
-        const frontOfHead = headPosition.x + headDimensions.width;
-
-        const headPositionWithFrontOfHead = {
-            x: frontOfHead,
-            y: headPosition.y
-        } satisfies Point;
-
-        for (let idx = body.length - 1; idx >= 0; --idx) {
-            const part = body[idx]!;
-
-            const partDimensions = part.getSize();
-            const partPosition = part.getPosition();
-
-            const isColliding = areBoxesInCollision(
-                headDimensions,
-                headPositionWithFrontOfHead,
-                partDimensions,
-                partPosition,
-            );
-
-            if (isColliding) {
-                return true;
-            }
-        }
-
-        return false;
+    private getPositionOfHeadCombinedWithItsLeftEdge(headPosition: Point, headDimensions: Dimensions): number {
+        return headPosition.x - headDimensions.width;
     }
 }
 
