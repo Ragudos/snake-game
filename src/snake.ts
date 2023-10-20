@@ -284,7 +284,7 @@ class Snake {
         return headPosition.y + headDimensions.height;
     }
 
-    private getPositionOfHeadCombinedWithItsUpperEdge(
+    private  getPositionOfHeadCombinedWithItsUpperEdge(
         headPosition: Point,
         headDimensions: Dimensions,
     ): number {

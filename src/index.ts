@@ -35,14 +35,16 @@ window.addEventListener("DOMContentLoaded", () => {
             if (aborter) {
                 aborter.abort();
             }
-            listenToStartGame(game);
+            
+            window.addEventListener("keydown", () => {
+                game.resetGame();
+                startGame(game);
+            }, {
+                once: true
+            });
         }
     });
 
-    listenToStartGame(game);
-});
-
-function listenToStartGame(game: Game): void {
     window.addEventListener(
         "keydown",
         () => {
@@ -52,7 +54,7 @@ function listenToStartGame(game: Game): void {
             once: true,
         },
     );
-}
+});
 
 function startGame(game: Game): void {
     scoreBoard.removeAttribute("hidden");
@@ -62,7 +64,6 @@ function startGame(game: Game): void {
     gameOverlay.style.opacity = "0";
     scoreBoard.innerText = "0";
 
-    game.resetGame();
     game.startGame();
 
     aborter = new AbortController();
