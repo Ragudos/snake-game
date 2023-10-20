@@ -68,11 +68,11 @@ class Snake {
         const body = this.__body;
         const baseSnakeLength = this.__baseSnakeLength;
 
-        this.__isPositionSet = false;
-
-        for (let idx = body.length - 1; idx >= baseSnakeLength; --idx) {
+        
+        for (let idx = body.length - 1; idx > baseSnakeLength; --idx) {
             body.pop();
         }
+        this.__isPositionSet = false;
     }
 
     /** To set the initial position of the snake. This can only be called once. */
