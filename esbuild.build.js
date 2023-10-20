@@ -2,7 +2,7 @@ import * as esbuild from "esbuild";
 
 try {
     const build_result = await esbuild.build({
-        entryPoints: ["src/**/*.ts"],
+        entryPoints: ["src/**/*.ts", "index.html"],
         entryNames: "[name]",
         loader: {
             ".html": "copy",
