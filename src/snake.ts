@@ -69,7 +69,7 @@ class Snake {
         const baseSnakeLength = this.__baseSnakeLength;
 
         
-        for (let idx = body.length - 1; idx > baseSnakeLength; --idx) {
+        for (let idx = body.length; idx > baseSnakeLength; --idx) {
             body.pop();
         }
         this.__isPositionSet = false;
