@@ -163,6 +163,8 @@ class Game {
 
         gameState.reset();
         gameObserver.notify();
+        this.__direction = 1;
+        this.__path = "horizontal";
         snake.reset();
         this.initialize();
     }

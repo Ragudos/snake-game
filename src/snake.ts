@@ -67,7 +67,6 @@ class Snake {
     reset(): void {
         const body = this.__body;
         const baseSnakeLength = this.__baseSnakeLength;
-
         
         for (let idx = body.length; idx > baseSnakeLength; --idx) {
             body.pop();

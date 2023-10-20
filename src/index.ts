@@ -10,6 +10,8 @@ const ARROW_UP = "ArrowUp";
 const ARROW_LEFT = "ArrowLeft";
 const ARROW_RIGHT = "ArrowRight";
 
+let aborter: AbortController;
+
 window.addEventListener("DOMContentLoaded", () => {
     const itemsSize = new Dimensions(10, 10);
     const game = new Game(itemsSize, canvas);
@@ -30,6 +32,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
             alert("GAME OVER!");
 
+            if (aborter) {
+                aborter.abort();
+            }
             listenToStartGame(game);
         }
     });
@@ -60,6 +65,8 @@ function startGame(game: Game): void {
     game.resetGame();
     game.startGame();
 
+    aborter = new AbortController();
+
     window.addEventListener("keydown", (e) => {
         const key = e.key;
 
@@ -84,5 +91,7 @@ function startGame(game: Game): void {
                 game.setDirection(1);
                 break;
         }
+    }, {
+        signal: aborter.signal,
     });
 }
