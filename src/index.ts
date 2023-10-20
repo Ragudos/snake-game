@@ -2,6 +2,8 @@ import Dimensions from "./dimensions";
 import Game from "./game";
 
 const canvas = document.getElementById("game-screen") as HTMLCanvasElement;
+const gameOverlay = document.getElementById("game-overlay") as HTMLDivElement;
+const scoreBoard = document.getElementById("score-board") as HTMLDivElement;
 
 const ARROW_DOWN = "ArrowDown";
 const ARROW_UP = "ArrowUp";
@@ -12,6 +14,50 @@ window.addEventListener("DOMContentLoaded", () => {
     const itemsSize = new Dimensions(10, 10);
     const game = new Game(itemsSize, canvas);
 
+    game.listenToGameStateChanges((gameState) => {
+        const points = gameState.getPoints();
+
+        scoreBoard.innerText = points + "";
+
+        const isGameOver = gameState.getIsGameOver();
+
+        if (isGameOver) {
+            game.stopGame();
+
+            gameOverlay.style.pointerEvents = "all";
+            gameOverlay.style.touchAction = "auto";
+            gameOverlay.style.opacity = "1";
+
+            alert("GAME OVER!");
+
+            listenToStartGame(game);
+        }
+    });
+
+    listenToStartGame(game);
+});
+
+function listenToStartGame(game: Game): void {
+    window.addEventListener(
+        "keydown",
+        () => {
+            startGame(game);
+        },
+        {
+            once: true,
+        },
+    );
+}
+
+function startGame(game: Game): void {
+    scoreBoard.removeAttribute("hidden");
+    gameOverlay.setAttribute("hidden", "true");
+    gameOverlay.style.pointerEvents = "none";
+    gameOverlay.style.touchAction = "none";
+    gameOverlay.style.opacity = "0";
+    scoreBoard.innerText = "0";
+
+    game.resetGame();
     game.startGame();
 
     window.addEventListener("keydown", (e) => {
@@ -39,4 +85,4 @@ window.addEventListener("DOMContentLoaded", () => {
                 break;
         }
     });
-});
+}

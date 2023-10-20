@@ -20,7 +20,7 @@ class Game {
     private __gameScreen: GameScreen;
 
     constructor(pixelSize: Dimensions, canvas: HTMLCanvasElement) {
-        const baseSnakeLength = 3;
+        const baseSnakeLength = 4;
         const gameState = new GameState(baseSnakeLength);
 
         this.__path = "horizontal";
@@ -36,28 +36,39 @@ class Game {
 
     private initialize(): void {
         const gameScreen = this.__gameScreen;
+        const gameCtx = gameScreen.getContext();
         const gameScreenDimensions = gameScreen.getSize();
         const food = this.__food;
         const pixelSize = this.__pixelSize;
         const snake = this.__snake;
-        
+
         const positionX = Math.floor(gameScreenDimensions.width / 2);
         const positionY = Math.floor(gameScreenDimensions.height / 2);
         const snakePosition = new Point(positionX, positionY);
-        
+
         snake.setPosition(snakePosition, "horizontal");
         snake.setColor("green");
         snake.setSize(pixelSize.width, pixelSize.height);
-        
+
         food.move(gameScreen);
         food.setColor("blue");
         food.setSize(pixelSize.width, pixelSize.height);
+
+        gameScreen.animate(gameCtx);
+        snake.animate(gameCtx);
+        food.animate(gameCtx);
     }
 
     // We use () => functions because they do not create their own instance of "this",
     // which means that we will retain their references to "this", which is
     // the class where they are declared.
     private animate = (): void => {
+        const gameState = this.__gameObserver.getData();
+
+        if (gameState.getIsGameOver()) {
+            return;
+        }
+
         const gameScreen = this.__gameScreen;
         const gameCtx = gameScreen.getContext();
         const snake = this.__snake;
@@ -80,7 +91,7 @@ class Game {
         setTimeout(() => {
             this.__animationId = window.requestAnimationFrame(this.animate);
         }, 50);
-    }
+    };
 
     private checkForCollisions(): void {
         const gameScreen = this.__gameScreen;
@@ -134,7 +145,7 @@ class Game {
     }
 
     stopGame(): void {
-        const animationId = this.__animationId
+        const animationId = this.__animationId;
 
         if (animationId) {
             window.cancelAnimationFrame(animationId);
@@ -143,6 +154,17 @@ class Game {
 
     startGame(): void {
         this.animate();
+    }
+
+    resetGame(): void {
+        const gameObserver = this.__gameObserver;
+        const gameState = gameObserver.getData();
+        const snake = this.__snake;
+
+        gameState.reset();
+        gameObserver.notify();
+        snake.reset();
+        this.initialize();
     }
 
     setPath(path: Path): void {

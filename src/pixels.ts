@@ -50,10 +50,13 @@ class SquarePixels extends Pixels {
         const dimensions = this.getSize();
 
         ctx.fillStyle = color;
-        ctx.fillRect(position.x, position.y, dimensions.width, dimensions.height);
+        ctx.fillRect(
+            position.x,
+            position.y,
+            dimensions.width,
+            dimensions.height,
+        );
     }
 }
 
-export {
-    SquarePixels
-};
+export { SquarePixels };

@@ -25,6 +25,6 @@ class GameScreen extends SquarePixels {
     getContext(): CanvasRenderingContext2D {
         return this.ctx;
     }
-};
+}
 
 export default GameScreen;

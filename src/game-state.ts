@@ -13,6 +13,12 @@ class GameState {
         this.__points += bonusPoints;
     }
 
+    reset(): void {
+        this.__isGameOver = false;
+        this.__points = 0;
+        this.__snakeLength = 0;
+    }
+
     updateSnakeLength(snakeLength: number): void {
         this.__snakeLength = snakeLength;
     }

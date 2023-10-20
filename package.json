@@ -4,10 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "node esbuild.dev.js && tsc --build",
-    "build": "node esbuild.build.js && tsc --build"
+    "build": "node esbuild.build.js && tsc --build",
+    "format": "prettier -w \"**/*.{ts,tsx,js,jsx,html,css}\""
   },
   "devDependencies": {
     "esbuild": "^0.19.5",
+    "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   }
 }

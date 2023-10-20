@@ -26,7 +26,7 @@ class Observer<T> {
     notify(): void {
         const data = this.__data;
         const subscribers = this.__subscribers;
-        
+
         for (const subscriber of subscribers.values()) {
             subscriber(data);
         }
