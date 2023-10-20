@@ -55,7 +55,6 @@ class Game {
         const snake = this.__snake;
         const food = this.__food;
 
-        
         snake.move(10, this.__path, this.__direction);
         
         gameScreen.animate(ctx);

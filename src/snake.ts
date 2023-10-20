@@ -75,11 +75,11 @@ class Snake {
 
             part.setPosition(positionX, positionY);
 
-            if (path == "horizontal") {
+            if (path == "horizontal" && idx > 0) {
                 positionX += currentPartSize.width
             }
 
-            if (path == "vertical") {
+            if (path == "vertical" && idx > 0) {
                 positionY += currentPartSize.height;
             }
         }
@@ -184,6 +184,8 @@ class Snake {
         const isSnakeGoingDown = currentDirection == 1 && currentPath == "vertical";
         const isSnakeGoingUp = currentDirection == -1 && currentPath == "vertical";
 
+        console.log(isSnakeGoingRight, isSnakeGoingLeft, isSnakeGoingDown, isSnakeGoingUp)
+
         if (isSnakeGoingRight) {
             return this.isSnakeCollidingWithBodyWhenGoingRight();
         } else if (isSnakeGoingLeft) {
@@ -211,7 +213,7 @@ class Snake {
             y: floorOfHead,
         } satisfies Point;
 
-        for (let idx = body.length - 1; idx >= 1; --idx) {
+        for (let idx = body.length - 1; idx >= 0; --idx) {
             const part = body[idx]!;
 
             const partDimensions = part.getSize();
@@ -246,7 +248,7 @@ class Snake {
             y: roofOfHead,
         } satisfies Point;
 
-        for (let idx = body.length - 1; idx >= 1; --idx) {
+        for (let idx = body.length - 1; idx >= 0; --idx) {
             const part = body[idx]!;
 
             const partDimensions = part.getSize();
@@ -281,7 +283,7 @@ class Snake {
             y: headPosition.y
         } satisfies Point;
 
-        for (let idx = body.length - 1; idx >= 1; --idx) {
+        for (let idx = body.length - 1; idx >= 0; --idx) {
             const part = body[idx]!;
 
             const partDimensions = part.getSize();
@@ -316,7 +318,7 @@ class Snake {
             y: headPosition.y
         } satisfies Point;
 
-        for (let idx = body.length - 1; idx >= 1; --idx) {
+        for (let idx = body.length - 1; idx >= 0; --idx) {
             const part = body[idx]!;
 
             const partDimensions = part.getSize();
